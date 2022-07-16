@@ -11,7 +11,6 @@ others/
 .cache/
 venv/
 __pycache__/
-*.log
 debug/
 *.egg-info/
 
@@ -57,7 +56,6 @@ moc_window.cpp
 
 # Executables
 *.exe
-*.out
 *.app
 
 
