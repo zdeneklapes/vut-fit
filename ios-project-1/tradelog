@@ -1,0 +1,431 @@
+#! /bin/sh
+export POSIXLY_CORRECT=yes
+export LC_ALL=C.UTF-8
+
+##
+# tradelog
+# Řešení IOS projekt 1, 21.3.2021
+# Autor: Zdenek Lapes <xlapes02>, FIT VUT Brno
+# Testovano: bash 5.1.
+#
+
+###############################################################################
+### HINT ###
+###############################################################################
+BOLD="\033[1m"
+NORMAL="\033[0m"
+hint() {
+    clear
+    echo "${BOLD}NAME"
+    echo "    ${BOLD}tradelog"
+    echo ""
+    echo "USAGE"
+    echo "    ${BOLD}tradelog ${NORMAL}[-h|--help]"
+    echo "    ${BOLD}tradelog ${NORMAL}[FILTER] [COMMAND] [LOG [LOG2 [...]]]"
+    echo ""
+    echo "${BOLD}ELECTION"
+    echo "    ${BOLD}COMMAND ${NORMAL}(only one)"
+    echo "        ${BOLD}list-tick ${NORMAL}- list of all exist stock symbols"
+    echo "        ${BOLD}profit ${NORMAL}- print total profit from closed positions"
+    echo "        ${BOLD}pos ${NORMAL}- list current values holding positions,
+                    sorted descending by values"
+    echo "        ${BOLD}last-price ${NORMAL}- print last known value for every TICKER"
+    echo "        ${BOLD}hist-ord ${NORMAL}- print histogram of all transactions for
+                    every ticker"
+    echo "        ${BOLD}graph-ord ${NORMAL}- print graph of values holding
+                    positions for every TICKER"
+    echo ""
+    echo "    ${BOLD}FILTER ${NORMAL}(can be used single or in combination with others)"
+    echo "        ${BOLD}-a DATETIME ${NORMAL}- after: records after this date without
+                    this date. (format ${BOLD}DATETIME : ${BOLD}YYYY-MM-DD HH:MM:SS)${NORMAL})"
+    echo "        ${BOLD}-b DATETIME ${NORMAL}- before: record before this date
+                    withou this date"
+    echo "        ${BOLD}-t TICKER ${NORMAL}- only record for this TICKER
+                    can be used for more TICKERS at the same time"
+    echo "        ${BOLD}-w WIDTH ${NORMAL}- set width of graph (the longest row)
+                    can be only positive number
+                    can be set only once, otherwise error"
+    echo ""
+    echo "${BOLD}DESCRIPTION${NORMAL}"
+    echo "      Script filtered stocks records. When Script receive some arguments, then executes them"
+    echo ""
+    echo "      When Script is without arguments, then only print stocks records."
+    echo ""
+    echo "      Script can write up records compressed using gzip (in case the name of file ended .gz)"
+    echo ""
+    echo "      In case scriot didn't receive any arguments with file name of records, then consider record from standart input"
+    echo ""
+    echo "      Every record is written to single row, if is this setting change, then printf record as the specification says"
+    echo ""
+    echo "      Graphs are printed using ASCII and are rotated to right side."
+    echo ""
+}
+
+###############################################################################
+### ARGUMENTS ###
+###############################################################################
+COMMAND=""
+#every date will greater than this date
+DATETIME_AFTER="0000-00-00 00:00:00"
+#every date will be smaller that this date
+DATETIME_BEFORE="9999-99-99 99:99:99"
+#pole tickers
+TICKERS=""
+WIDTH=""
+#pole files .log
+FILES_LOG=""
+#pole files .gz
+FILES_GZ=""
+
+error() {
+    echo "${1}"
+    exit 1
+}
+
+# read arguments (save)
+while [ "$#" -gt 0 ]; do
+    case $1 in
+    -h | --help)
+        hint
+        exit 1
+        ;;
+    *".log")
+        #       save file name to pole divided "space"
+        if [ -f "${1}" ]; then
+            FILES_LOG="${1} ${FILES_LOG}"
+            #       if file not exist -> err
+        else
+            error "ERROR: File not exist!   -->   ${1}"
+        fi
+        ;;
+    *".gz")
+        #       save file name to pole divided "space"
+        if [ -f "${1}" ]; then
+            FILES_GZ="${1} ${FILES_GZ}"
+        else
+            #           if file not exist -> err
+            error "ERROR: File not exist!   -->   ${1}"
+        fi
+        ;;
+    list-tick | profit | pos | last-price | hist-ord | graph-pos)
+        #       if 2 commands or 2nd command is different from first => error
+        #       program can have only one command
+        if [ "${COMMAND}" != "" ] && [ "${COMMAND}" != "${1}" ]; then
+            error "ERROR: Command not correct!   -->   1.: ${COMMAND}   -   2.: ${1}"
+            #       save the command
+        else
+            COMMAND="${1}"
+        fi
+        ;;
+    "-a")
+        #       shift important because currently "$1" is equal "-a" next should be DATETIME in right format
+        shift
+        #check if date is in correct format
+        AWK_IF_FORMAT_OK="$(awk -v b="${1}" 'BEGIN {if (b ~ /[0-9][0-9][0-9][0-9][-][0-9][0-9][-][0-9][0-9][ ][0-9][0-9][:][0-9][0-9][:][0-9][0-9]/) {print "1"} else {print "0"}}')"
+        if [ "${AWK_IF_FORMAT_OK}" = "1" ]; then
+            #           chech if 2nd date is newer -> save, otherwise the 1st stay
+            AWK_IF_NEWER="$(awk -v a="${DATETIME_AFTER}" -v b="${1}" 'BEGIN {if (a < b) {print "1"} else {print "0"}}')"
+            if [ "${AWK_IF_NEWER}" = "1" ]; then
+                DATETIME_AFTER="${1}"
+            fi
+            #       if not in correct format -> err
+        else
+            error "ERROR: Command not correct!   -->   ${1}"
+        fi
+        ;;
+    "-b")
+        #       shift important because currently "$1" is equal "-b" next should be DATETIME in right format
+        shift
+        #check if date is in correct format
+        AWK_IF_FORMAT_OK="$(awk -v b="${1}" 'BEGIN {if (b ~ /[0-9][0-9][0-9][0-9][-][0-9][0-9][-][0-9][0-9][ ][0-9][0-9][:][0-9][0-9][:][0-9][0-9]/) {print "1"} else {print "0"}}')"
+        if [ "${AWK_IF_FORMAT_OK}" = "1" ]; then
+            #chech if 2nd date is older -> save, otherwise the 1st stay
+            AWK_IF_NEWER="$(awk -v a="${DATETIME_BEFORE}" -v b="${1}" 'BEGIN {if (a > b) {print "1"} else {print "0"}}')"
+            if [ "${AWK_IF_NEWER}" = "1" ]; then
+                DATETIME_BEFORE="${1}"
+            fi
+            #       if not in right format -> err
+        else
+            error "ERROR: Command not correct!   -->   ${1}"
+        fi
+        ;;
+    "-t")
+        #       shift important because currently "$1" is equal "-t" next should be DATETIME in right format
+        shift
+        TICKERS="\;${1}\;\|${TICKERS}"
+        ;;
+    "-w")
+        #       shift important because currently "$1" is equal "-w" next should be DATETIME in right format
+        shift
+        #       width nesmi byt zaporna
+        #       if is == 0, then script suppose default width for every command separetely
+        if [ "${1}" -lt 0 ]; then
+            error "ERROR: Command not correct!   -->   ${1}"
+        else
+            WIDTH="${1}"
+        fi
+        ;;
+    *)
+        error "ERROR: Command not correct!   -->   ${1}"
+        ;;
+    esac
+    shift
+done
+
+###############################################################################
+### SOURCE ###
+###############################################################################
+# file haven't been included
+if [ "$FILES_LOG" = "" ] && [ "$FILES_GZ" = "" ]; then
+    SOURCE="cat -"
+# only file .log
+elif [ "$FILES_LOG" != "" ] && [ "$FILES_GZ" = "" ]; then
+    SOURCE="cat ${FILES_LOG}"
+#only .gz
+elif [ "$FILES_LOG" = "" ] && [ "$FILES_GZ" != "" ]; then
+    SOURCE="gzip -d -c ${FILES_GZ}"
+#both .log and .gz
+else
+    SOURCE="gzip -d -c ${FILES_GZ} | cat ${FILES_LOG} -"
+fi
+
+###############################################################################
+### FILTER ###
+###############################################################################
+#made the minimum to sort the reports for better usage later
+TICKERS_SED="$(echo "${TICKERS}" | sed 's/\\|$//g')" # vymaze '\|' na konci
+TICKERS_FILTER="grep '${TICKERS_SED}'"
+DATE_FILTER="awk -F';' '\$1 > \"$DATETIME_AFTER\" && \$1 < \"$DATETIME_BEFORE\" {print \$0}'"
+FILTER_BASE="${SOURCE} | ${TICKERS_FILTER} | ${DATE_FILTER}"
+
+###############################################################################
+### COMMAND ###
+###############################################################################
+
+###############################################################################
+### SORT ###
+SORT="sort -t ';' -k 2,2"
+SORT_UNIQUE="sort -u" #-u unique take only once occurence of TICKER
+SORT_TICKER="sort -t ':' -k 1,1"
+POS_SORT1="sort -t ';' -k 2,2"
+POS_SORT2="sort -t ':' -k 2,2 -n -r"
+
+###############################################################################
+### AWK ###
+LIST_TICK="awk -F ';' '{print \$2}'"
+AWK_PROFIT="awk -F';' '{if (\$3 == \"sell\") {b=b+(\$4 * \$6)} else {c=c+(\$4 * \$6)}} END {printf(\"%.2f\n\", b-c)}'"
+POS_AWK="awk '
+BEGIN {
+    FS=\";\";
+}
+{
+    LAST_STOCK=\$2;
+    if (\$3 == \"sell\") {
+        STOCK[\$2]=STOCK[\$2] - \$6;
+    }
+    if (\$3 == \"buy\") {
+        STOCK[\$2]=STOCK[\$2] + \$6;
+    }
+    if (\$2 != LAST_STOCK && NR != 1) {
+        STOCK[LAST_STOCK]=STOCK[LAST_STOCK];
+    }
+    PRICES[LAST_STOCK]=\$4;
+}
+END {
+    for (stock in STOCK) {
+        STOCK_PRICES[stock]=sprintf(\"%.2f\",STOCK[stock] * PRICES[stock]);
+        if (CHARS < length(STOCK_PRICES[stock]))
+        {
+            CHARS=length(STOCK_PRICES[stock]);
+        }
+    }
+    for (stock in STOCK_PRICES) {
+        printf(\"%-10s:\", stock);
+        if (STOCK_PRICES[stock] != \"\")
+        {
+            printf(\" %*.2f\n\", CHARS, STOCK_PRICES[stock]);
+        }
+    }
+}
+'"
+
+LAST_PRICE_AWK="awk '
+BEGIN {
+    FS=\";\";
+}
+{
+    PRICES[\$2]=\$4;
+}
+END {
+       for (stock in PRICES) {
+        PRICES[stock]=sprintf(\"%.2f\",PRICES[stock]);
+        if (CHARS < length(PRICES[stock]))
+        {
+            CHARS=length(PRICES[stock]);
+        }
+    }
+    for (stock in PRICES) {
+        printf(\"%-10s:\", stock);
+        if (PRICES[stock] != \"\")
+        {
+            printf(\" %*.2f\n\", CHARS, PRICES[stock]);
+        }
+    }
+}
+'"
+
+HIST_ORD_AWK="awk '
+BEGIN {
+    FS=\";\";
+}
+{
+    # nacita pocet transakci pro kazdy stock
+    STOCK[\$2]=STOCK[\$2] + 1;
+}
+END {
+# pokud width set tak spocitak kolik transakci obsahuje jeden tick
+    if (\"$WIDTH\" != \"\" && \"$WIDTH\" != 0)
+    {
+        for (stock in STOCK)
+        {
+            if(MAX > STOCK[stock]/\"$WIDTH\")
+            {
+                continue;
+            }
+            else
+            {
+                MAX=STOCK[stock]/\"$WIDTH\";
+            }
+        }
+    }
+#    jinak tisk vsech transakci
+    else
+    {
+        MAX=-1;
+    }
+
+    for (stock in STOCK)
+    {
+#    count how many ticks in graph must be printed
+        COUNT=(MAX < 0) ? STOCK[stock] : int(STOCK[stock]/MAX);
+        printf(\"%-10s:\", stock);
+        if (COUNT > 0)
+        {
+            printf(\" \");
+            for(i=0; i < COUNT; i++)
+                printf(\"%c\", \"#\");
+        }
+        printf(\"\n\");
+    }
+}
+'"
+
+GRAPH_POS_AWK="awk '
+function abs(v) {
+    return v < 0 ? -v : v;
+}
+
+BEGIN {
+    FS=\";\";
+}
+{
+    LAST_STOCK=\$2;
+    if (\$3 == \"sell\") {
+        STOCK[\$2]=STOCK[\$2] - \$6;
+    }
+    if (\$3 == \"buy\") {
+        STOCK[\$2]=STOCK[\$2] + \$6;
+    }
+    if (\$2 != LAST_STOCK && NR != 1) {
+        STOCK[LAST_STOCK]=STOCK[LAST_STOCK];
+    }
+    PRICES[LAST_STOCK]=\$4;
+}
+END {
+    # count price for every stock
+    for (stock in STOCK) {
+        STOCK_PRICES[stock]=STOCK[stock] * PRICES[stock];
+    }
+    # initilize MAX and set its value (the biggest stock position)
+    # kdyby sirka nebyla nastavena tak 1000
+    if (\"$WIDTH\" == \"\" && \"$WIDTH\" != 0)
+    {
+        MAX=1000;
+    }
+    else {
+        for (stock in STOCK_PRICES) {
+            if(MAX > (abs(STOCK_PRICES[stock])/\"$WIDTH\")) {
+                continue;
+            } else {
+                MAX=abs(STOCK_PRICES[stock])/\"$WIDTH\";
+            }
+        }
+    }
+    # print stock graph
+    for (stock in STOCK_PRICES)
+    {
+        COUNT=int(STOCK_PRICES[stock]/MAX);
+        #print COUNT;
+
+        if (COUNT >= 0)
+        {
+            printf(\"%-10s:\", stock);
+            if (COUNT != 0)
+			{
+				printf(\" \");
+				for(i=0; i < COUNT; i++)
+					printf(\"%c\", \"#\");
+			}
+            printf(\"\n\");
+        }
+        else
+        {
+            printf(\"%-10s:\", stock);
+#           abs musi byt jinak nejede
+            if (COUNT != 0)
+			{
+				printf(\" \");
+				for(i=0; i < abs(COUNT); i++)
+					printf(\"%c\", \"!\");
+			}
+            printf(\"\n\");
+        }
+    }
+}
+'"
+
+###############################################################################
+### COMPLET ###
+LIST_TICK_COMPLET="${FILTER_BASE} | ${LIST_TICK} | ${SORT} | ${SORT_UNIQUE}"
+PROFIT_COMPLET="${FILTER_BASE} | ${AWK_PROFIT}"
+POS_COMPLET="${FILTER_BASE} | ${POS_SORT1} | ${POS_AWK} | ${POS_SORT2}"
+LAST_PRICE_COMPLET="${FILTER_BASE} | ${POS_SORT1} | ${LAST_PRICE_AWK} | ${SORT_TICKER}"
+HIST_ORD_COMPLET="${FILTER_BASE} | ${POS_SORT1} | ${HIST_ORD_AWK} | ${SORT_TICKER}"
+GRAPH_POS_COMPLET="${FILTER_BASE} | ${POS_SORT1} | ${GRAPH_POS_AWK} | ${SORT_TICKER}"
+
+###############################################################################
+### IF_ELSE (DO COMMANDS) ###
+if [ "$COMMAND" = "list-tick" ]; then
+    eval "${LIST_TICK_COMPLET}"
+elif [ "$COMMAND" = "profit" ]; then
+    eval "${PROFIT_COMPLET}"
+elif [ "$COMMAND" = "pos" ]; then
+    eval "${POS_COMPLET}"
+elif [ "$COMMAND" = "last-price" ]; then
+    eval "${LAST_PRICE_COMPLET}"
+elif [ "$COMMAND" = "hist-ord" ]; then
+    eval "${HIST_ORD_COMPLET}"
+elif [ "$COMMAND" = "graph-pos" ]; then
+    eval "${GRAPH_POS_COMPLET}"
+else
+    eval "${FILTER_BASE}"
+fi
+
+###############################################################################
+### DEGUB ###
+###############################################################################
+#echo "${DATETIME_AFTER}"
+#echo "${DATETIME_BEFORE}"
+
+# return success code
+exit 0
