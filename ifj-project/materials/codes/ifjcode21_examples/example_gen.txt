@@ -1,0 +1,34 @@
+function foo(a,b,c) {
+	int d = a+b+c
+}
+
+label $foo
+	pushframe
+
+	defvar LF@a
+	move   LF@a LF@p1
+
+	defvar LF@b
+	move   LF@b LF@p2
+	
+	defvar LF@c
+	move   LF@c LF@p3
+
+	defvar LF@d
+	add LF@d LF@a LF@b
+	add LF@d LF@d LF@c
+
+	popframe
+	return
+
+
+
+label $foo
+	pushframe
+
+	defvar LF@d
+	add LF@d LF@p1 LF@p2
+	add LF@d LF@d  LF@p3
+
+	popframe
+	return

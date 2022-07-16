@@ -1,0 +1,22 @@
+# Built-in fn readi
+
+.IFJcode21
+
+jump main
+
+label readi
+	pushframe	
+	defvar		LF@ret1
+	READ
+	label end
+	popframe
+	return		
+
+
+
+LABEL main
+	createframe
+	call 	readi
+	write 	TF@ret1
+	break
+	exit 	int@0

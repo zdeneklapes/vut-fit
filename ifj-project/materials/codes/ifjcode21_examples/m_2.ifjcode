@@ -1,0 +1,7 @@
+.IFJcode21
+
+WRITE float@0x1.26666666666p+0
+WRITE string@\010
+
+EXIT int@0
+

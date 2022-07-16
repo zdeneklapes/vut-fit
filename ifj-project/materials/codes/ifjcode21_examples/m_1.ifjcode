@@ -1,0 +1,7 @@
+.IFJcode21
+
+write string@\010
+write nil@nil
+write string@a
+write string@\010
+write string@\010

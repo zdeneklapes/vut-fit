@@ -1,0 +1,754 @@
+# Built-in fn tointeger
+
+.IFJcode21
+defvar 	GF@bottom_of_stack
+move 	GF@bottom_of_stack string@best_bottom_of_stack_12368900teamwork_vut_ifj_project_this_is_too_long_nowcedni2v28r4398bf9bvidfbw9849829h2398fb29h982hf924bb8924
+
+defvar GF@&var1
+defvar GF@&type1
+
+jump $$main
+
+label $op_nil
+	createframe
+	defvar TF@%0p
+	move   TF@%0p string@ERROR\0328:\032Unexpected\032nil\032value\032in\032the\032parameter.\010
+	call   $write 
+	exit   int@8
+
+
+label $check_is_nil
+	pops GF@&var1
+	type GF@&type1 GF@&var1
+	jumpifeq $op_nil GF@&type1 string@nil
+	pushs GF@&var1
+	return
+
+# convert number (int, float) to int ; when arg nil return nil
+label $tointeger # tointeger(f : number) : integer
+# TODO - nil and maybe bad arg types
+	# start
+	pushframe			# TF => LF
+	createframe			# new TF
+
+	# logic
+	defvar		LF@$tointeger$0p_type
+	pushs 		LF@%0p
+	call 		$check_is_nil
+
+	TYPE		LF@$tointeger$0p_type LF@%0p
+	jumpifneq 	$tointeger$end LF@$tointeger$0p_type string@float
+	float2ints
+
+	## end
+	label $tointeger$end
+	popframe 			# LF => TF
+	return		
+
+
+# read and return int
+label $readi # readi() : integer
+	## start
+	createframe
+	pushframe	
+
+	## logic
+	defvar		LF@readi$ret1
+	read 		LF@readi$ret1 int
+	pushs 		LF@readi$ret1
+
+	## end
+	popframe
+	return		
+
+
+# read and return number (int or float)
+label $readn # readn() : number
+	# start
+	pushframe	
+	createframe
+
+	# logic
+	defvar 		LF@readn$ret1
+	read 		LF@readn$ret1 float
+	pushs 		LF@readn$ret1
+
+	# end
+	popframe
+	return
+
+
+# read and return string
+label $reads # reads() : string
+	# start
+	pushframe	
+	createframe
+
+	# logic
+	defvar 		LF@reads$ret1
+	read 		LF@reads$ret1 string
+	pushs  		LF@reads$ret1
+
+	# end
+	popframe
+	return
+
+# 	function foo(a:integer)
+label $write # write(... : string | integer | number | boolean)  -- podpora boolean pro bonusove rozsireni
+	# start
+	pushframe	
+	createframe
+
+	# logic
+	defvar 		LF@&write_var_type
+	type		LF@&write_var_type 	LF@%0p
+	jumpifeq 	$write$type$nil 	LF@&write_var_type string@nil
+	write 		LF@%0p
+	jump 		$write$end
+
+	label 		$write$type$nil
+	write 		string@nil
+
+	# end
+	label $write$end
+	popframe
+	return
+
+
+label $substr # substr(str : string, i : integer, j : integer) : string 
+	# start
+	pushframe	
+	createframe
+
+	# logic
+	defvar 	LF@substr$str
+	defvar 	LF@substr$i
+	defvar 	LF@substr$j
+	defvar 	LF@substr$ret1
+	defvar 	LF@substr$len
+	defvar 	LF@substr$while$cnt
+	defvar 	LF@substr$char
+	defvar 	LF@substr$cmp
+
+	pushs LF@%0p
+	call  $check_is_nil
+	pops  LF@substr$str
+	pushs LF@%1p
+	call  $check_is_nil
+	pops  LF@substr$i
+	pushs LF@%2p
+	call  $check_is_nil
+	pops  LF@substr$j
+
+	move 	LF@substr$ret1 		string@
+	strlen 	LF@substr$len 		LF@substr$str
+	move 	LF@substr$while$cnt	int@0
+	move 	LF@substr$char 		string@
+	move 	LF@substr$cmp 		bool@false
+
+	sub LF@substr$i LF@substr$i int@1
+	sub LF@substr$j LF@substr$j int@1
+	# i > j
+	gt 			LF@substr$cmp 		LF@substr$i	 	LF@substr$j
+	JUMPIFEQ 	$substr_label_end2 	LF@substr$cmp 	bool@true
+	# i < 0
+	lt 			LF@substr$cmp 		LF@substr$i 	int@0
+	JUMPIFEQ 	$substr_label_end2 	LF@substr$cmp 	bool@true
+	# j < 0
+	lt 			LF@substr$cmp 		LF@substr$j 	int@0
+	JUMPIFEQ 	$substr_label_end2 	LF@substr$cmp 	bool@true
+	# i > len-1
+	lt 			LF@substr$cmp 		LF@substr$i 	LF@substr$len
+	JUMPIFNEQ 	$substr_label_end2 	LF@substr$cmp 	bool@true
+	# j > len-1
+	lt 			LF@substr$cmp 		LF@substr$j 	LF@substr$len
+	JUMPIFNEQ 	$substr_label_end2 	LF@substr$cmp 	bool@true
+
+	
+ 	label $substr_while1
+ 	getchar  LF@substr$char 		LF@substr$str 		LF@substr$i
+ 	concat   LF@substr$ret1 		LF@substr$ret1		LF@substr$char
+ 	jumpifeq $substr_label_end 		LF@substr$i 	    LF@substr$j
+ 	add 	 LF@substr$while$cnt	LF@substr$while$cnt int@1
+ 	add 	 LF@substr$i   			LF@substr$i 		int@1
+ 	jump 	 $substr_while1
+
+   # end
+ 	label $substr_label_end
+ 	pushs 	LF@substr$ret1
+	popframe
+	return
+
+   # end 2
+ 	label $substr_label_end2
+ 	pushs 	string@
+	popframe
+	return
+
+
+
+label $ord # ord(s : string, i : integer) : integer
+	# start
+	pushframe	
+	createframe
+
+	# logic
+	defvar 		LF@ord$s
+	defvar 		LF@ord$i
+	defvar 		LF@ord$cmp
+	defvar 		LF@ord$ret1
+	defvar 		LF@ord$len
+
+	pushs LF@%0p
+	call $check_is_nil
+	pops LF@ord$s
+	pushs LF@%1p
+	call $check_is_nil
+	pops LF@ord$i
+
+	strlen		LF@ord$len 		LF@ord$s
+	
+  # if i <= 0 or i > #s then
+	sub 		LF@ord$i LF@ord$i int@1
+	gt 			LF@ord$cmp 		LF@ord$i 	LF@ord$len
+	JUMPIFEQ 	$ord_label_end 	LF@ord$cmp 	bool@true
+	lt 			LF@ord$cmp 		LF@ord$i 	int@0
+	JUMPIFEQ 	$ord_label_end2	LF@ord$cmp 	bool@true
+	lt 			LF@ord$cmp 		LF@ord$i	LF@ord$len
+	JUMPIFNEQ 	$ord_label_end2	LF@ord$cmp	bool@true
+
+	stri2int 	LF@ord$ret1 LF@ord$s LF@ord$i
+
+	label $ord_label_end
+	pushs LF@ord$ret1
+	popframe
+	return
+
+	label $ord_label_end2
+	pushs nil@nil
+	popframe
+	return
+
+
+label $chr # chr(i : integer) : string
+	## start
+	pushframe	
+	createframe
+
+	# logic
+	defvar 		LF@chr$i
+	defvar 		LF@chr$ret1
+	defvar 		LF@chr$cmp
+
+	pushs LF@%0p
+	call $check_is_nil
+	pops 		LF@chr$i
+
+	move 		LF@chr$ret1 nil@nil
+	move 		LF@chr$cmp 	bool@false
+
+	gt 			LF@chr$cmp 		LF@chr$i 	int@255
+	JUMPIFEQ 	$chr_label_end 	LF@chr$cmp 	bool@true
+	lt 			LF@chr$cmp 		LF@chr$i 	int@0
+	JUMPIFEQ 	$chr_label_end 	LF@chr$cmp 	bool@true
+	
+	int2char 	LF@chr$ret1 	LF@chr$i
+	pushs 		LF@chr$ret1
+	popframe
+	return
+
+	## end
+	label $chr_label_end
+	pushs nil@nil
+	popframe
+	return
+
+
+LABEL $$main
+	## start
+	createframe
+	pushframe 		# create local frame for main fn
+	createframe
+
+# 	defvar LF@var1
+
+	## logic
+
+
+##########################################
+# 	test tointeger
+#	createframe
+#	defvar TF@%0p 
+#	move   TF@%0p int@3
+#	call   $tointeger 
+#	call   $write
+#	clears
+#
+#	createframe
+#	defvar TF@%0p 
+#	move   TF@%0p float@0x1.44p+1
+#	call   $tointeger 
+#	pops   TF@%0p
+#	call   $write
+#	clears
+#
+#	createframe
+#	defvar TF@%0p 
+#	move   TF@%0p string@ahoj
+#	call   $tointeger 
+#	pops   TF@%0p
+#	call   $write
+#	clears
+#
+#	createframe
+#	defvar TF@%0p 
+#	move   TF@%0p bool@true
+#	call   $tointeger 
+#	pops   TF@%0p
+#	call   $write
+#	clears
+#	
+#	createframe
+#	defvar TF@%0p 
+#	move   TF@%0p nil@nil
+#	call   $tointeger 
+#	pops   TF@%0p
+#	call   $write
+#	clears
+##########################################
+
+
+# 	pushs 	GF@bottom_of_stack
+# 	pushs 	float@0x1.24p+1
+# 	call 	$tointeger 
+# 	call 	$write 
+# 	clears
+
+
+# 	pushs 	GF@bottom_of_stack
+# 	pushs 	nil@nil
+# 	call 	$tointeger 
+# 	call 	$write 
+# 	clears 
+# 	exit 	int@0
+
+
+# 	test readi
+# 	pushs 	GF@bottom_of_stack
+# 	call 	$readi
+# 	call 	$write
+# 	clears
+# 	exit 	int@0
+
+
+# 	test readn
+# 	pushs 	GF@bottom_of_stack
+# 	call 	$readn
+# 	call 	$write
+# 	clears
+# 	exit 	int@0
+
+
+# 	test reads
+# 	pushs 	GF@bottom_of_stack
+# 	call 	$reads
+# 	call 	$write
+# 	clears
+# 	exit 	int@0
+
+# 	test substr
+# 	pushs 	GF@bottom_of_stack
+# 	call 	$reads
+# 	call 	$write
+# 	clears
+# 	exit 	int@0
+
+
+# 	test write
+# 	pushs	GF@bottom_of_stack
+# 	pushs	string@ahoj
+# 	pushs	int@3
+# 	pushs	float@0x1.0210p+0
+# 	pushs	bool@false
+# 	pushs	nil@nil
+
+#	createframe
+#	defvar  TF@%0p
+#	move    TF@%0p string@ahoj
+#	call 	$write
+#
+#	createframe
+#	defvar  TF@%0p
+#	move    TF@%0p int@3
+#	call 	$write
+#
+#	createframe
+#	defvar  TF@%0p
+#	move    TF@%0p float@2.1
+#	call 	$write
+#	
+#	createframe
+#	defvar  TF@%0p
+#	move    TF@%0p bool@true
+#	call 	$write
+#	
+#	createframe
+#	defvar  TF@%0p
+#	move    TF@%0p nil@nil
+#	call 	$write
+# 	clears
+# 	exit 	int@0
+
+
+# 	test substr
+# 	pushs	int@3
+# 	pushs	int@1
+# 	pushs	string@ahoj
+
+###########################################
+######
+#	createframe # new TF
+#	defvar 	TF@%0p
+#	defvar 	TF@%1p
+#	defvar 	TF@%2p
+#	move	TF@%0p 	string@ahoj
+#	move	TF@%1p	int@1
+#	move	TF@%2p  int@2
+#	call 	$substr
+#
+#	createframe
+#	defvar  TF@%0p
+#	pops    TF@%0p 
+#	call 	$write
+#
+#	createframe
+#	pushs   string@\010
+#	defvar  TF@%0p
+#	pops 	TF@%0p
+#	call 	$write
+######
+######
+#	createframe # new TF
+#	defvar 	TF@%0p
+#	defvar 	TF@%1p
+#	defvar 	TF@%2p
+#	move	TF@%0p 	string@ahoj
+#	move	TF@%1p	int@0
+#	move	TF@%2p  int@2
+#	call 	$substr
+#
+#	createframe
+#	defvar  TF@%0p
+#	pops    TF@%0p 
+#	call 	$write
+#
+#	createframe
+#	pushs   string@\010
+#	defvar  TF@%0p
+#	pops 	TF@%0p
+#	call 	$write
+######
+######
+#	createframe # new TF
+#	defvar 	TF@%0p
+#	defvar 	TF@%1p
+#	defvar 	TF@%2p
+#	move	TF@%0p 	string@ahoj
+#	move	TF@%1p	int@0
+#	move	TF@%2p  int@-1
+#	call 	$substr
+#
+#	createframe
+#	defvar  TF@%0p
+#	pops    TF@%0p 
+#	call 	$write
+#
+#	createframe
+#	pushs   string@\010
+#	defvar  TF@%0p
+#	pops 	TF@%0p
+#	call 	$write
+######
+######
+#	createframe # new TF
+#	defvar 	TF@%0p
+#	defvar 	TF@%1p
+#	defvar 	TF@%2p
+#	move	TF@%0p 	string@ahoj
+#	move	TF@%1p	int@0
+#	move	TF@%2p  int@5
+#	call 	$substr
+#
+#	createframe
+#	defvar  TF@%0p
+#	pops    TF@%0p 
+#	call 	$write
+#
+#	createframe
+#	pushs   string@\010
+#	defvar  TF@%0p
+#	pops 	TF@%0p
+#	call 	$write
+######
+######
+#	createframe # new TF
+#	defvar 	TF@%0p
+#	defvar 	TF@%1p
+#	defvar 	TF@%2p
+#	move	TF@%0p 	string@ahoj
+#	move	TF@%1p	int@5
+#	move	TF@%2p  int@2
+#	call 	$substr
+#
+#	createframe
+#	defvar  TF@%0p
+#	pops    TF@%0p 
+#	call 	$write
+#
+#	createframe
+#	pushs   string@\010
+#	defvar  TF@%0p
+#	pops 	TF@%0p
+#	call 	$write
+######
+######
+#	createframe # new TF
+#	defvar 	TF@%0p
+#	defvar 	TF@%1p
+#	defvar 	TF@%2p
+#	move	TF@%0p 	string@ahoj
+#	move	TF@%1p	int@0
+#	move	TF@%2p  int@2
+#	call 	$substr
+#
+#	createframe
+#	defvar  TF@%0p
+#	pops    TF@%0p 
+#	call 	$write
+#
+#	createframe
+#	pushs   string@\010
+#	defvar  TF@%0p
+#	pops 	TF@%0p
+#	call 	$write
+######
+######
+#	createframe # new TF
+#	defvar 	TF@%0p
+#	defvar 	TF@%1p
+#	defvar 	TF@%2p
+#	move	TF@%0p 	string@ahoj
+#	move	TF@%1p	int@0
+#	move	TF@%2p  int@2
+#	call 	$substr
+#
+#	createframe
+#	defvar  TF@%0p
+#	pops    TF@%0p 
+#	call 	$write
+#
+#	createframe
+#	pushs   string@\010
+#	defvar  TF@%0p
+#	pops 	TF@%0p
+#	call 	$write
+######
+######
+#	createframe # new TF
+#	defvar 	TF@%0p
+#	defvar 	TF@%1p
+#	defvar 	TF@%2p
+#	move	TF@%0p 	string@ahoj
+#	move	TF@%1p	nil@nil
+#	move	TF@%2p  int@2
+#	call 	$substr
+#
+#	createframe
+#	defvar  TF@%0p
+#	pops    TF@%0p 
+#	call 	$write
+#
+#	createframe
+#	pushs   string@\010
+#	defvar  TF@%0p
+#	pops 	TF@%0p
+#	call 	$write
+######
+######
+#	createframe # new TF
+#	defvar 	TF@%0p
+#	defvar 	TF@%1p
+#	defvar 	TF@%2p
+#	move	TF@%0p 	string@ahoj
+#	move	TF@%1p	int@0
+#	move	TF@%2p  nil@nil
+#	call 	$substr
+#
+#	createframe
+#	defvar  TF@%0p
+#	pops    TF@%0p 
+#	call 	$write
+#
+#	createframe
+#	pushs   string@\010
+#	defvar  TF@%0p
+#	pops 	TF@%0p
+#	call 	$write
+######
+###########################################
+
+
+
+############################################
+######
+## 	test ord
+#	createframe
+#	defvar  TF@%0p
+#	move 	TF@%0p string@ahoj
+#	defvar  TF@%1p
+#	move 	TF@%1p int@1
+# 	call 	$ord
+#
+#	createframe
+#	defvar  TF@%0p
+#	pops 	TF@%0p
+# 	call 	$write
+######
+######
+## 	test ord
+#	createframe
+#	defvar  TF@%0p
+#	move 	TF@%0p string@ahoj
+#	defvar  TF@%1p
+#	move 	TF@%1p int@-1
+# 	call 	$ord
+#
+#	createframe
+#	defvar  TF@%0p
+#	pops 	TF@%0p
+# 	call 	$write
+######
+######
+## 	test ord
+#	createframe
+#	defvar  TF@%0p
+#	move 	TF@%0p string@ahoj
+#	defvar  TF@%1p
+#	move 	TF@%1p int@3
+# 	call 	$ord
+#
+#	createframe
+#	defvar  TF@%0p
+#	pops 	TF@%0p
+# 	call 	$write
+######
+######
+## 	test ord
+#	createframe
+#	defvar  TF@%0p
+#	move 	TF@%0p string@ahoj
+#	defvar  TF@%1p
+#	move 	TF@%1p int@4
+# 	call 	$ord
+#
+#	createframe
+#	defvar  TF@%0p
+#	pops 	TF@%0p
+# 	call 	$write
+######
+######
+## 	test ord
+#	createframe
+#	defvar  TF@%0p
+#	move 	TF@%0p string@ahoj
+#	defvar  TF@%1p
+#	move 	TF@%1p int@5
+# 	call 	$ord
+#
+#	createframe
+#	defvar  TF@%0p
+#	pops 	TF@%0p
+# 	call 	$write
+######
+######
+## 	test ord
+#	createframe
+#	defvar  TF@%0p
+#	move 	TF@%0p string@ahoj
+#	defvar  TF@%1p
+#	move 	TF@%1p int@0
+# 	call 	$ord
+#
+#	createframe
+#	defvar  TF@%0p
+#	pops 	TF@%0p
+# 	call 	$write
+######
+######
+## 	test ord
+#	createframe
+#	defvar  TF@%0p
+#	move 	TF@%0p nil@nil
+#	defvar  TF@%1p
+#	move 	TF@%1p int@0
+# 	call 	$ord
+#
+#	createframe
+#	defvar  TF@%0p
+#	pops 	TF@%0p
+# 	call 	$write
+######
+############################################
+
+
+############################################
+## 	test chr
+######
+#	createframe
+#	defvar  TF@%0p
+#	move 	TF@%0p int@100
+#	call 	$chr
+#
+#	createframe
+#	defvar  TF@%0p
+#	pops 	TF@%0p
+# 	call 	$write
+######
+######
+#	createframe
+#	defvar  TF@%0p
+#	move 	TF@%0p int@-1
+#	call 	$chr
+#
+#	createframe
+#	defvar  TF@%0p
+#	pops 	TF@%0p
+# 	call 	$write
+######
+######
+#	createframe
+#	defvar  TF@%0p
+#	move 	TF@%0p int@256
+#	call 	$chr
+#
+#	createframe
+#	defvar  TF@%0p
+#	pops 	TF@%0p
+# 	call 	$write
+######
+######
+#	createframe
+#	defvar  TF@%0p
+#	move 	TF@%0p nil@nil
+#	call 	$chr
+#
+#	createframe
+#	defvar  TF@%0p
+#	pops 	TF@%0p
+# 	call 	$write
+######
+############################################
+
+	clears
+	exit 	int@0
+

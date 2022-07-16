@@ -1,0 +1,239 @@
+# Built-in fn tointeger
+
+.IFJcode21
+
+jump $$main
+
+# convert number (int, float) to int ; when arg nil return nil
+label $tointeger # tointeger(f : number) : integer
+	# start
+# 	pushframe			# TF => LF
+# 	createframe			# new TF
+
+	createframe			# new TF
+	pushframe			# TF => LF
+	
+	defvar TF@param1
+
+	# logic
+	defvar		LF@ret1
+	defvar		LF@$tointeger$var$type
+	TYPE		LF@$tointeger$var$type LF@param1
+
+	jumpifeq 	t_nil  LF@$tointeger$var$type string@nil
+	jumpifneq 	tointeger_end  LF@$tointeger$var$type string@float
+
+	label t_float
+	float2int 	LF@param1 	LF@param1
+	move 		LF@ret1 	LF@param1
+	jump 		tointeger_end
+
+	label tointeger_end
+	move 		LF@ret1 LF@param1 		# ret1 = param1 (nil | int | float)
+
+	## end
+	popframe 			# LF => TF
+	clears
+	return		
+
+
+# TODO - readi, readn
+# TODO - "11jj11"	bad 	=>	nil
+# TODO - "jj11"		bad		=> 	nil
+# TODO - "11jj"		bad		=>	nil
+# TODO - "11 jj"	bad 	=> 	nil
+# TODO - "jj 11"	bad 	=>	nil
+# TODO - ""			empty 	=> 	nil
+# TODO - "11"		OK		=>	11(int)
+
+# read and return int
+label $readi # readi() : integer
+	## start
+	pushframe	
+	createframe
+
+	## logic
+	defvar		LF@ret1
+	read 		LF@ret1 int
+
+	## end
+	popframe
+	clears
+	return		
+
+
+# read and return number (int or float)
+label $readn # readn() : number
+	# start
+	pushframe	
+	createframe
+
+	# logic
+	defvar 		LF@ret1
+	read 		LF@ret1 float
+
+	# end
+	popframe
+	clears
+	return
+
+
+# read and return string
+label $reads # reads() : string
+	# start
+	pushframe	
+	createframe
+
+	# logic
+	defvar 		LF@ret1
+	read 		LF@ret1 float
+
+	# end
+	popframe
+	clears
+	return
+
+
+label $write # write(... : string | integer | number | boolean)  -- podpora boolean pro bonusove rozsireni
+	# start
+	pushframe	
+	createframe
+	defvar 		LF@$write$var$type
+
+	# logic
+	TYPE 		LF@$write$var$type LF@param1
+	jumpifeq 	$write$label$t_nil LF@$write$var$type string@nil
+
+	label others
+	write 		LF@param1
+	jump 		$write$label$end
+
+	label 		$write$label$t_nil
+	write 		string@nil
+
+	# end
+	label $write$label$end
+	popframe
+	clears
+	return
+
+
+label $substr # substr(str : string, i : integer, j : integer) : string 
+	# start
+	pushframe	
+	createframe
+
+	# logic
+
+
+	# end
+	popframe
+	clears
+	return
+
+
+label $ord # ord(s : string, i : integer) : integer
+	# start
+	pushframe	
+	createframe
+
+	# logic
+	defvar LF@ret1
+	stri2int LF@ret1 LF@param1 LF@param2
+
+	# end
+	popframe
+	clears
+	return
+
+
+label $chr # chr(i : integer) : string
+	## start
+	pushframe	
+	createframe
+
+	# TODO - i == nil
+	defvar 		LF@ret1
+	defvar 		LF@$chr$var$type 
+	type 		LF@$chr$var$type LF@param1
+
+	## logic
+	jumpifneq 	$chr$label$end LF@$chr$var$type  string@nil
+	exit int@8
+
+	label $chr$label$end
+	int2char LF@ret1 LF@param1
+
+	## end
+	popframe
+	clears
+	return
+
+
+LABEL $$main
+	## start
+	createframe
+	pushframe 		# create local frame for main fn
+	createframe
+
+	defvar 	TF@param1
+	defvar 	TF@param2
+	defvar 	TF@param3
+
+	## logic
+	# test tointeger
+# 	move 	TF@param1 int@3
+# 	move 	TF@param1 float@0x1.24p+1
+# 	move 	TF@param1 nil@nil
+# 	write string@tointeger
+# 	call 	$tointeger
+
+	
+	# test readi
+# 	write string@readi
+ # 	call 	$readi
+# 	move 	TF@param1 TF@ret1
+# 	call 	$write
+
+	# test readn
+# 	write string@readn
+  # 	call 	$readn
+# 	move 	TF@param1 TF@ret1
+# 	call 	$write
+# 	write 	string@\010
+
+	# test reads
+# 	write string@reads
+# 	call 	$reads
+# 	move 	TF@param1 TF@ret1
+# 	call 	$write
+
+	# test ord
+	write 	string@ord
+	move 	TF@param1 string@ahoj
+	move 	TF@param2 int@2
+  	call 	$ord
+	move 	TF@param1 TF@ret1
+	pops 	TF@param1
+	call 	$write
+
+
+	# test chr
+# 	write 	string@chr
+# 	move 	TF@param1 int@101
+  # 	call 	$chr
+# 	move 	TF@param1 TF@ret1
+# 	call 	$write
+
+
+	
+	## end
+# 	move 	TF@param1 TF@ret1
+# 	call 	$write
+# 	write 	string@\010
+
+	break
+	clears
+	exit 	int@0
+
+

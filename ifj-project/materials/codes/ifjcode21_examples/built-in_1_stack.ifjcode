@@ -1,0 +1,352 @@
+# Built-in fn tointeger
+
+.IFJcode21
+defvar 	GF@bottom_of_stack
+move 	GF@bottom_of_stack string@best_bottom_of_stack_12368900teamwork_vut_ifj_project_this_is_too_long_nowcedni2v28r4398bf9bvidfbw9849829h2398fb29h982hf924bb8924
+
+
+jump $$main
+
+# convert number (int, float) to int ; when arg nil return nil
+label $tointeger # tointeger(f : number) : integer
+	# start
+	createframe			# new TF
+	pushframe			# TF => LF
+
+	# logic
+	defvar		LF@ret1
+	defvar		LF@$tointeger_var_type
+
+	pops 		LF@ret1
+	TYPE		LF@$tointeger_var_type LF@ret1
+
+	jumpifneq 	$tointeger_end LF@$tointeger_var_type string@float
+
+	label t_float
+	float2int 	LF@ret1 	LF@ret1
+	jump 		$tointeger_end
+
+	## end
+	label $tointeger_end
+	pushs LF@ret1
+	popframe 			# LF => TF
+	return		
+
+
+# read and return int
+label $readi # readi() : integer
+	## start
+	createframe
+	pushframe	
+
+	## logic
+	defvar		LF@readi_ret1
+	read 		LF@readi_ret1 int
+	pushs 		LF@readi_ret1
+
+	## end
+	popframe
+	return		
+
+
+# read and return number (int or float)
+label $readn # readn() : number
+	# start
+	createframe
+	pushframe	
+
+	# logic
+	defvar 		LF@readn_ret1
+	read 		LF@readn_ret1 float
+	pushs 		LF@readn_ret1
+
+	# end
+	popframe
+	return
+
+
+# read and return string
+label $reads # reads() : string
+	# start
+	createframe
+	pushframe	
+
+	# logic
+	defvar 		LF@reads_ret1
+	read 		LF@reads_ret1 string
+	pushs  		LF@reads_ret1
+
+	# end
+	popframe
+	return
+
+
+label $write # write(... : string | integer | number | boolean)  -- podpora boolean pro bonusove rozsireni
+	# start
+	createframe
+	pushframe	
+
+	# logic
+	defvar 		LF@write_var_type
+	defvar 		LF@write_var_print
+
+	label $write_while1
+	pops 		LF@write_var_print
+	type		LF@write_var_type 	LF@write_var_print 
+	jumpifeq 	$write_label_t_nil 	LF@write_var_type string@nil
+	jumpifeq 	$write_label_string	LF@write_var_type string@string
+	write 		LF@write_var_print
+	jump 		$write_while1
+
+	label $write_label_string
+	jumpifeq 	$write_label_end	LF@write_var_print GF@bottom_of_stack
+	write 		LF@write_var_print
+	jump 		$write_while1
+
+	label 		$write_label_t_nil
+	write 		string@nil
+	jump 		$write_while1
+
+	# end
+	label $write_label_end
+	popframe
+	return
+
+
+label $substr # substr(str : string, i : integer, j : integer) : string 
+	# start
+	createframe
+	pushframe	
+
+	# logic
+	defvar 	LF@substr_param1
+	defvar 	LF@substr_param2
+	defvar 	LF@substr_param3
+	defvar 	LF@substr_ret1
+	defvar 	LF@substr_len
+	defvar 	LF@substr_while_cnt
+	defvar 	LF@substr_char
+	defvar 	LF@substr_cmp
+
+	pops 	LF@substr_param1
+	pops 	LF@substr_param2
+	pops 	LF@substr_param3
+	move 	LF@substr_ret1 		string@
+	strlen 	LF@substr_len 		LF@substr_param1
+	move 	LF@substr_while_cnt	int@0
+	move 	LF@substr_char 		string@
+	move 	LF@substr_cmp 		bool@false
+
+	# j > i
+	gt 			LF@substr_cmp 		LF@substr_param2 	LF@substr_param3
+	JUMPIFEQ 	$substr_label_end2 	LF@substr_cmp 		bool@true
+	# i < 0
+	lt 			LF@substr_cmp 		LF@substr_param2 	int@0
+	JUMPIFEQ 	$substr_label_end2 	LF@substr_cmp 		bool@true
+	# j < 0
+	lt 			LF@substr_cmp 		LF@substr_param3 	int@0
+	JUMPIFEQ 	$substr_label_end2 	LF@substr_cmp 		bool@true
+	# i > len-1
+	lt 			LF@substr_cmp 		LF@substr_param2 	LF@substr_len
+	JUMPIFNEQ 	$substr_label_end2 	LF@substr_cmp 		bool@true
+	# j > len-1
+	lt 			LF@substr_cmp 		LF@substr_param3 	LF@substr_len
+	JUMPIFNEQ 	$substr_label_end2 	LF@substr_cmp 		bool@true
+
+
+	label $substr_while1
+	getchar  LF@substr_char 		LF@substr_param1 	LF@substr_param2
+	concat   LF@substr_ret1 		LF@substr_ret1		LF@substr_char
+	jumpifeq $substr_label_end 		LF@substr_param2 	LF@substr_param3
+	add 	 LF@substr_while_cnt	LF@substr_while_cnt int@1
+	add 	 LF@substr_param2 		LF@substr_param2 	int@1
+	jump 	 $substr_while1
+
+	# end
+	label $substr_label_end
+	clears
+	pushs 	GF@bottom_of_stack
+	pushs 	LF@substr_ret1
+	jump 	$substr_label_end3
+
+	# end 2
+	label $substr_label_end2
+	clears
+	pushs 	GF@bottom_of_stack
+	pushs 	nil@nil
+
+	# end 3
+	label $substr_label_end3
+	popframe
+	return
+
+
+label $ord # ord(s : string, i : integer) : integer
+	# start
+	createframe
+	pushframe	
+
+	# logic
+	defvar 		LF@ord_param1
+	defvar 		LF@ord_param2
+	defvar 		LF@ord_cmp
+	defvar 		LF@ord_ret1
+	defvar 		LF@ord_len
+
+	pops 		LF@ord_param1
+	pops 		LF@ord_param2
+	move 		LF@ord_ret1 	bool@false
+	move 		LF@ord_ret1 	nil@nil
+	strlen		LF@ord_len 		LF@ord_param1
+	
+	gt 			LF@ord_cmp 		LF@ord_param2 	int@255
+	JUMPIFEQ 	$ord_label_end 	LF@ord_cmp 		bool@true
+	lt 			LF@ord_cmp 		LF@ord_param2 	int@0
+	JUMPIFEQ 	$ord_label_end 	LF@ord_cmp 		bool@true
+	lt 			LF@ord_cmp 		LF@ord_param2	LF@ord_len
+	JUMPIFNEQ 	$ord_label_end 	LF@ord_cmp 		bool@true
+	
+	stri2int 	LF@ord_ret1 LF@ord_param1 LF@ord_param2
+
+	label $ord_label_end
+	pushs 		LF@ord_ret1
+
+	# end
+	popframe
+	return
+
+
+label $chr # chr(i : integer) : string
+	## start
+	createframe
+	pushframe	
+
+	# logic
+	defvar 		LF@chr_param1
+	defvar 		LF@chr_ret1
+	defvar 		LF@chr_cmp
+
+	pops 		LF@chr_param1
+	move 		LF@chr_ret1 	nil@nil
+
+	gt 			LF@chr_cmp 		LF@chr_param1 	int@255
+	JUMPIFEQ 	$chr_label_end 	LF@chr_cmp 		bool@true
+	lt 			LF@chr_cmp 		LF@chr_param1 	int@0
+	JUMPIFEQ 	$chr_label_end 	LF@chr_cmp 		bool@true
+	
+	int2char 	LF@chr_ret1 	LF@chr_param1
+
+	## end
+	label $chr_label_end
+	pushs 		LF@chr_ret1
+	popframe
+	return
+
+
+LABEL $$main
+	## start
+	createframe
+	pushframe 		# create local frame for main fn
+
+	defvar LF@var1
+
+	## logic
+
+# 	test tointeger
+# 	pushs 	GF@bottom_of_stack
+# 	pushs 	int@03
+# 	call 	$tointeger 
+# 	call 	$write 
+# 	clears
+
+
+# 	pushs 	GF@bottom_of_stack
+# 	pushs 	float@0x1.24p+1
+# 	call 	$tointeger 
+# 	call 	$write 
+# 	clears
+
+
+# 	pushs 	GF@bottom_of_stack
+# 	pushs 	nil@nil
+# 	call 	$tointeger 
+# 	call 	$write 
+# 	clears 
+# 	exit 	int@0
+
+
+# 	test readi
+# 	pushs 	GF@bottom_of_stack
+# 	call 	$readi
+# 	call 	$write
+# 	clears
+# 	exit 	int@0
+
+
+# 	test readn
+# 	pushs 	GF@bottom_of_stack
+# 	call 	$readn
+# 	call 	$write
+# 	clears
+# 	exit 	int@0
+
+
+# 	test reads
+# 	pushs 	GF@bottom_of_stack
+# 	call 	$reads
+# 	call 	$write
+# 	clears
+# 	exit 	int@0
+
+# 	test substr
+# 	pushs 	GF@bottom_of_stack
+# 	call 	$reads
+# 	call 	$write
+# 	clears
+# 	exit 	int@0
+
+
+# 	test write
+# 	pushs	GF@bottom_of_stack
+# 	pushs	string@ahoj
+# 	pushs	int@3
+# 	pushs	float@0x1.0210p+0
+# 	pushs	bool@false
+# 	pushs	nil@nil
+# 	call 	$write
+# 	clears
+# 	exit 	int@0
+
+
+# 	test substr
+# 	pushs	int@3
+# 	pushs	int@1
+# 	pushs	string@ahoj
+# 	call 	$substr
+# 	call 	$write
+# 	clears
+# 	exit 	int@0
+
+
+# 	test ord
+# 	pushs 	GF@bottom_of_stack
+# 	pushs 	int@2
+# 	pushs 	string@ahoj
+# 	call 	$ord
+# 	call 	$write
+# 	clears
+# 	exit 	int@0
+
+
+# 	test chr
+# 	pushs 	GF@bottom_of_stack
+# 	pushs 	int@100
+# 	call 	$chr
+# 	call 	$write
+# 	clears
+# 	exit 	int@0
+
+
+	clears
+	exit 	int@0
+

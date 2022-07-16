@@ -1,0 +1,31 @@
+# Built-in fn readi
+
+.IFJcode21
+
+jump main
+
+label readi
+	pushframe	
+	defvar		LF@ret1
+	defvar		LF@type
+	TYPE		LF@type LF@param1
+	jumpifneq 	end  LF@type string@float
+	float2int 	LF@param1 LF@param1
+
+	label end
+	move 		LF@ret1 LF@param1
+	popframe
+	return		
+
+
+
+LABEL main
+	createframe
+	defvar 	TF@param1
+	#move 	TF@param1 int@3
+	move 	TF@param1 float@0x1.24p+1
+	
+	call 	readi
+	write 	TF@ret1
+	break
+	exit 	int@0
