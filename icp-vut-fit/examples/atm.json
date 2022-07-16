@@ -1,0 +1,273 @@
+{
+    "class_diagram": {
+        "entities": [
+            {
+                "class_info": {
+                    "attributes": [
+                    ],
+                    "methods": [
+                        {
+                            "name": "performSession()",
+                            "type": "void",
+                            "visibility": "+"
+                        },
+                        {
+                            "name": "handleFailedTransaction()",
+                            "type": "void",
+                            "visibility": "+"
+                        }
+                    ],
+                    "name": "Session"
+                },
+                "coordinates": {
+                    "x": -576,
+                    "y": -108
+                }
+            },
+            {
+                "class_info": {
+                    "attributes": [
+                    ],
+                    "methods": [
+                        {
+                            "name": "insertCard()",
+                            "type": "void",
+                            "visibility": "+"
+                        },
+                        {
+                            "name": "readCard()",
+                            "type": "Card",
+                            "visibility": "+"
+                        },
+                        {
+                            "name": "readPIN()",
+                            "type": "int",
+                            "visibility": "+"
+                        },
+                        {
+                            "name": "retainCard()",
+                            "type": "void",
+                            "visibility": "+"
+                        }
+                    ],
+                    "name": "CardReader"
+                },
+                "coordinates": {
+                    "x": -628,
+                    "y": 121
+                }
+            },
+            {
+                "class_info": {
+                    "attributes": [
+                        {
+                            "name": "cash",
+                            "type": "Cash",
+                            "visibility": "+"
+                        },
+                        {
+                            "name": "id",
+                            "type": "int",
+                            "visibility": "+"
+                        }
+                    ],
+                    "methods": [
+                        {
+                            "name": "cardInsert()",
+                            "type": "void",
+                            "visibility": "+"
+                        },
+                        {
+                            "name": "readPIN()",
+                            "type": "int",
+                            "visibility": "+"
+                        },
+                        {
+                            "name": "switchOn()",
+                            "type": "void",
+                            "visibility": "+"
+                        }
+                    ],
+                    "name": "Atm"
+                },
+                "coordinates": {
+                    "x": -824,
+                    "y": -106
+                }
+            }
+        ],
+        "relations": [
+            {
+                "entity1": "Session",
+                "entity2": "Atm",
+                "name": "has",
+                "type1": "ASSOCIATION",
+                "type2": "ASSOCIATION"
+            },
+            {
+                "entity1": "CardReader",
+                "entity2": "Atm",
+                "name": "read",
+                "type1": "ASSOCIATION",
+                "type2": "ASSOCIATION"
+            }
+        ],
+        "texts": [
+            {
+                "text": "0..1",
+                "x": -606,
+                "y": -39
+            },
+            {
+                "text": "1",
+                "x": -694,
+                "y": -128
+            },
+            {
+                "text": "0..1",
+                "x": -635,
+                "y": 97
+            },
+            {
+                "text": "0..1",
+                "x": -685,
+                "y": 0
+            }
+        ]
+    },
+    "sequence_diagram": [
+        {
+            "items": [
+                {
+                    "boxes": [
+                        {
+                            "s": 406,
+                            "y": 245
+                        }
+                    ],
+                    "coordinates": {
+                        "s": 51,
+                        "x": 269,
+                        "y": -285
+                    },
+                    "name": "Session",
+                    "type": "object"
+                },
+                {
+                    "boxes": [
+                        {
+                            "s": 76,
+                            "y": 107
+                        },
+                        {
+                            "s": 421,
+                            "y": 242
+                        },
+                        {
+                            "s": 81,
+                            "y": 363
+                        }
+                    ],
+                    "coordinates": {
+                        "s": 51,
+                        "x": 50,
+                        "y": -284
+                    },
+                    "name": "Atm",
+                    "type": "object"
+                },
+                {
+                    "boxes": [
+                        {
+                            "s": 571,
+                            "y": 109
+                        }
+                    ],
+                    "coordinates": {
+                        "s": 51,
+                        "x": -245,
+                        "y": -283
+                    },
+                    "name": "CardReader",
+                    "type": "object"
+                }
+            ],
+            "lifeline": 640,
+            "messages": [
+                {
+                    "is_black": false,
+                    "is_created": false,
+                    "is_dashed": true,
+                    "len": 596,
+                    "name": "",
+                    "parent_from": "Atm",
+                    "parent_to": "CardReader"
+                },
+                {
+                    "is_black": false,
+                    "is_created": false,
+                    "is_dashed": true,
+                    "len": 567,
+                    "name": "",
+                    "parent_from": "Session",
+                    "parent_to": "Atm"
+                },
+                {
+                    "is_black": false,
+                    "is_created": false,
+                    "is_dashed": true,
+                    "len": 368,
+                    "name": "pin",
+                    "parent_from": "CardReader",
+                    "parent_to": "Atm"
+                },
+                {
+                    "is_black": true,
+                    "is_created": false,
+                    "is_dashed": false,
+                    "len": 329,
+                    "name": "readPIN",
+                    "parent_from": "Atm",
+                    "parent_to": "CardReader"
+                },
+                {
+                    "is_black": false,
+                    "is_created": false,
+                    "is_dashed": true,
+                    "len": 382,
+                    "name": "pin",
+                    "parent_from": "Atm",
+                    "parent_to": "Session"
+                },
+                {
+                    "is_black": true,
+                    "is_created": false,
+                    "is_dashed": false,
+                    "len": 310,
+                    "name": "readPIN",
+                    "parent_from": "Session",
+                    "parent_to": "Atm"
+                },
+                {
+                    "is_black": true,
+                    "is_created": false,
+                    "is_dashed": false,
+                    "len": 194,
+                    "name": "performSession",
+                    "parent_from": "Atm",
+                    "parent_to": "Session"
+                },
+                {
+                    "is_black": true,
+                    "is_created": false,
+                    "is_dashed": false,
+                    "len": 57,
+                    "name": "cardInsert",
+                    "parent_from": "CardReader",
+                    "parent_to": "Atm"
+                }
+            ],
+            "name": "Default Name"
+        }
+    ]
+}

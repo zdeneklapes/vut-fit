@@ -1,0 +1,271 @@
+{
+    "class_diagram": {
+        "entities": [
+            {
+                "class_info": {
+                    "attributes": [
+                    ],
+                    "methods": [
+                        {
+                            "name": "main()",
+                            "type": "int",
+                            "visibility": "+"
+                        }
+                    ],
+                    "name": "BookstoreStarter"
+                },
+                "coordinates": {
+                    "x": -311,
+                    "y": -311
+                }
+            },
+            {
+                "class_info": {
+                    "attributes": [
+                        {
+                            "name": "name",
+                            "type": "string",
+                            "visibility": "+"
+                        }
+                    ],
+                    "methods": [
+                        {
+                            "name": "searchBook()",
+                            "type": "int",
+                            "visibility": "+"
+                        }
+                    ],
+                    "name": "Bookstore"
+                },
+                "coordinates": {
+                    "x": -439,
+                    "y": -198
+                }
+            },
+            {
+                "class_info": {
+                    "attributes": [
+                        {
+                            "name": "number",
+                            "type": "int",
+                            "visibility": "+"
+                        }
+                    ],
+                    "methods": [
+                        {
+                            "name": "getBook()",
+                            "type": "int",
+                            "visibility": "+"
+                        }
+                    ],
+                    "name": "Catalog"
+                },
+                "coordinates": {
+                    "x": -555,
+                    "y": -38
+                }
+            },
+            {
+                "class_info": {
+                    "attributes": [
+                        {
+                            "name": "id",
+                            "type": "int",
+                            "visibility": "+"
+                        }
+                    ],
+                    "methods": [
+                        {
+                            "name": "getOffers()",
+                            "type": "Array",
+                            "visibility": "+"
+                        }
+                    ],
+                    "name": "CRM"
+                },
+                "coordinates": {
+                    "x": -314,
+                    "y": -18
+                }
+            }
+        ],
+        "relations": [
+            {
+                "entity1": "Bookstore",
+                "entity2": "CRM",
+                "name": "",
+                "type1": "COMPOSITION",
+                "type2": "GENERALIZATION"
+            },
+            {
+                "entity1": "Bookstore",
+                "entity2": "BookstoreStarter",
+                "name": "",
+                "type1": "GENERALIZATION",
+                "type2": "ASSOCIATION"
+            },
+            {
+                "entity1": "Bookstore",
+                "entity2": "Catalog",
+                "name": "",
+                "type1": "COMPOSITION",
+                "type2": "GENERALIZATION"
+            },
+            {
+                "entity1": "Catalog",
+                "entity2": "CRM",
+                "name": "",
+                "type1": "GENERALIZATION",
+                "type2": "ASSOCIATION"
+            }
+        ],
+        "texts": [
+        ]
+    },
+    "sequence_diagram": [
+        {
+            "items": [
+                {
+                    "boxes": [
+                        {
+                            "s": 167,
+                            "y": 258
+                        }
+                    ],
+                    "coordinates": {
+                        "s": 52,
+                        "x": 478,
+                        "y": -282
+                    },
+                    "name": "CRM",
+                    "type": "object"
+                },
+                {
+                    "boxes": [
+                        {
+                            "s": 82,
+                            "y": 152
+                        },
+                        {
+                            "s": 82,
+                            "y": 296
+                        }
+                    ],
+                    "coordinates": {
+                        "s": 52,
+                        "x": 266,
+                        "y": -281
+                    },
+                    "name": "Catalog",
+                    "type": "object"
+                },
+                {
+                    "boxes": [
+                        {
+                            "s": 302,
+                            "y": 138
+                        }
+                    ],
+                    "coordinates": {
+                        "s": 52,
+                        "x": 140,
+                        "y": -281
+                    },
+                    "name": "Bookstore",
+                    "type": "object"
+                },
+                {
+                    "boxes": [
+                        {
+                            "s": 347,
+                            "y": 106
+                        }
+                    ],
+                    "coordinates": {
+                        "s": 52,
+                        "x": -38,
+                        "y": -280
+                    },
+                    "name": "BookstoreStarter",
+                    "type": "object"
+                }
+            ],
+            "lifeline": 400,
+            "messages": [
+                {
+                    "is_black": true,
+                    "is_created": false,
+                    "is_dashed": false,
+                    "len": 83,
+                    "name": "searchBook",
+                    "parent_from": "BookstoreStarter",
+                    "parent_to": "Bookstore"
+                },
+                {
+                    "is_black": true,
+                    "is_created": false,
+                    "is_dashed": false,
+                    "len": 99,
+                    "name": "getBook",
+                    "parent_from": "Bookstore",
+                    "parent_to": "Catalog"
+                },
+                {
+                    "is_black": true,
+                    "is_created": false,
+                    "is_dashed": false,
+                    "len": 208,
+                    "name": "getOffers",
+                    "parent_from": "Bookstore",
+                    "parent_to": "CRM"
+                },
+                {
+                    "is_black": true,
+                    "is_created": false,
+                    "is_dashed": false,
+                    "len": 242,
+                    "name": "getBook",
+                    "parent_from": "CRM",
+                    "parent_to": "Catalog"
+                },
+                {
+                    "is_black": false,
+                    "is_created": false,
+                    "is_dashed": true,
+                    "len": 370,
+                    "name": "message",
+                    "parent_from": "CRM",
+                    "parent_to": "Bookstore"
+                },
+                {
+                    "is_black": false,
+                    "is_created": false,
+                    "is_dashed": true,
+                    "len": 326,
+                    "name": "message",
+                    "parent_from": "Catalog",
+                    "parent_to": "CRM"
+                },
+                {
+                    "is_black": false,
+                    "is_created": false,
+                    "is_dashed": true,
+                    "len": 178,
+                    "name": "message",
+                    "parent_from": "Catalog",
+                    "parent_to": "Bookstore"
+                },
+                {
+                    "is_black": false,
+                    "is_created": false,
+                    "is_dashed": true,
+                    "len": 387,
+                    "name": "message",
+                    "parent_from": "Bookstore",
+                    "parent_to": "BookstoreStarter"
+                }
+            ],
+            "name": "Default Name"
+        }
+    ]
+}
