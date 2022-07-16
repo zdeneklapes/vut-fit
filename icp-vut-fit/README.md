@@ -15,9 +15,10 @@ Instalation:
 
 Introduction
 ---
-This project was done as assignment to the subject **ICP** at Faculty Of Information Technology VUT in Brno.
+This project was done as assignment to the subject **ICP** 
+at faculty of information technology vut in brno.
 
 
 Result
 ---
-**Gained points: 65/100**
+**gained points: 65/100**
