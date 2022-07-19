@@ -10,7 +10,7 @@ Authors
 
 Introduction
 ---
-This project was done as assignment to the subject **icp** 
+This project was done as assignment to the subject **IDS** 
 at faculty of information technology vut in brno.
 
 
